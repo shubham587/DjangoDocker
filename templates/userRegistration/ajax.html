@@ -1,0 +1,148 @@
+<script>
+
+   $("#formId").submit(function(event) {
+
+      event.preventDefault();
+ 
+      // Get form
+      var form = $(this)[0];
+
+      // Create an FormData object 
+      var data = new FormData(form);
+
+      $.ajax({
+         type: "POST",
+         enctype: 'multipart/form-data',
+         url: "saveForm/",
+         data: data,
+         processData: false,
+         contentType: false,
+         cache: false,
+         success: function (data) {
+            if(data.status == "success"){
+               alert("data added successfully")
+               $("form")[0].reset()
+               output = ""
+               console.log(data.userData)
+               let task = data.userData
+               for(let i=0; i<task.length; i++){
+                  output += "<tr><td>"+(i+1)+"</td><td>"+task[i].name+"</td><td>"+task[i].email+"</td><td>"+task[i].password+
+                     "</td><td><input type='button' onclick='editData("+ task[i].id +")' class='btnEdit btn btn-warning' value='Edit' data-id="+ task[i].id +
+                     "</input></td><td><input type='button' onclick='deleteData("+ task[i].id +")' class='btn btn-danger btnDel' value='Delete' data-id="+ task[i].id
+                     +"</input></td></tr>"
+               }
+
+               $("#tableBody").html(output)
+
+            }
+            else{
+               alert("data didn't save")
+            }
+
+         },
+         error: function (e) {
+            
+         }
+      });
+
+   });
+
+   // function deleteData(id) {
+   //    alert(id)
+   // }
+
+   var deleteData = (id) => {
+      console.log(id, "this is id")
+      let csr = $("#formId").find("input[name=csrfmiddlewaretoken]").val()
+      console.log(csr)
+      let delRow = $(this)
+      let delData = {sid : id, csrfmiddlewaretoken : csr}
+      $.ajax({
+         url : "{% url 'deleteUser' %}",
+         type : "POST",
+         method : "POST",
+         data : delData,
+         dataType : "json",
+         success : (data) => {
+            if(data.status == "success"){
+               alert("row is deleted")
+               output = ""
+               // console.log(data.userData)
+               let task = data.userData
+               // console.log(task)
+               for(let i=0; i<task.length; i++){
+                  output += "<tr><td>"+(i+1)+"</td><td>"+task[i].name+"</td><td>"+task[i].email+"</td><td>"+task[i].password+
+                     "</td><td><input type='button' onclick='editData("+ task[i].id +")' class='btnEdit btn btn-warning form-check-inline' value='Edit' data-id="+ task[i].id +
+                     "</input></td><td><input type='button' onclick='deleteData("+ task[i].id +")' class='btn btn-danger btnDel form-check-inline' value='Delete' data-id="+ task[i].id
+                     +"</input></td></tr>"
+               }
+
+               $("#tableBody").html(output)
+            }
+         }
+      })
+   }
+
+
+
+
+   // $("tbody").on("click", ".updateBtn", () => {
+
+   // })
+
+   var editData = (id) => {
+      // console.log(id, "this is id")
+      let csr = $("#formId").find("input[name=csrfmiddlewaretoken]").val()
+      // console.log(csr)
+      let delRow = $(this)
+      let delData = {sid : id, csrfmiddlewaretoken : csr}
+      $.ajax({
+         url : "{% url 'editUser' %}",
+         type : "POST",
+         method : "POST",
+         data : delData,
+         dataType : "json",
+         success : (data) => {
+            if(data.status == "success"){
+               $("#formId").find("#userId").val(id)
+               $("#formId").find("#nameId").val(data.userData.name)
+               $("#formId").find("#emailId").val(data.userData.email)
+               $("#formId").find("#passwordId").val(data.userData.password)
+            }else{
+               alert("faileed")
+            }
+         }
+      })
+   }
+
+   // {% comment %} $("#tableBody").on("click", ".btnDel", () => {
+   //    let id = $(this).data("sid")
+   //    var sid =  $(this).attr("id")
+   //    console.log("I just clicked edit btn",$(this), id, sid)
+   // }) {% endcomment %}
+
+         // $("#submitBtn").click(() => {
+         //    let nm = $("#nameId").val()
+         //    let em = $("#emailId").val()
+         //    let pwd = $("#passwordId").val()
+         //    let csr = $("input[name = csrfmiddlewaretoken]")
+         //    if(nm!="" && em != "" && pwd != ""){
+         //       console.log("hellooo")
+         //       formInfo = {name:nm, email:em, password:pwd, csrfmiddlewaretoken:csr};
+         //       $.ajax({
+         //          url: "{% url 'saveForm' %}",
+         //          method : "POST",
+         //          data : formInfo,
+         //          dataType : "json",
+         //          success : (data) => {
+         //             console.log(data,"sent data")
+         //          }
+         //       });
+         //    }else{
+         //       console.log("All fields are required")
+         //    }
+         // })
+      
+      
+   
+</script>
